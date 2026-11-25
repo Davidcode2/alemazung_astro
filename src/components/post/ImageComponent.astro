@@ -1,0 +1,28 @@
+---
+import { getStrapiMedia } from "@/lib/api-helpers";
+
+interface Props {
+  image: {
+    url: string;
+    altText?: string;
+    caption?: string;
+  };
+}
+
+const { image } = Astro.props;
+---
+
+<div class="my-6">
+  <img
+    src={getStrapiMedia(image.url)!}
+    alt={image.altText || image.caption || ""}
+    class="rounded-lg max-w-full"
+    width="600"
+    height="400"
+  />
+  {image?.caption && (
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+      {image.caption}
+    </p>
+  )}
+</div>

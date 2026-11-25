@@ -1,0 +1,84 @@
+---
+import "../styles/global.css";
+import "@fontsource/playfair-display/400.css";
+import "@fontsource/playfair-display/600.css";
+import "@fontsource/playfair-display/700.css";
+import "@fontsource/playfair-display/800.css";
+import "@fontsource/playfair-display/400-italic.css";
+import "@fontsource/geist/300.css";
+import "@fontsource/geist/400.css";
+import "@fontsource/geist/500.css";
+import "@fontsource/geist/600.css";
+import "@fontsource/geist/700.css";
+import "@fontsource/geist/800.css";
+import "@fontsource/geist-mono/400.css";
+import "@fontsource/fira-code/400.css";
+import TopNavigation from "../components/menu/TopNavigation.astro";
+import Footer from "../components/menu/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  lang: string;
+}
+
+const { 
+  title = "Dr. Joy A. Alemazung - Bürgermeister von Heubach",
+  description = "Dr. Joy A. Alemazung ist Bürgermeister von Heubach und Wissenschaftler mit Expertise in Nachhaltigkeit, Migrationspolitik und internationalen Beziehungen.",
+  lang = "de-DE"
+} = Astro.props;
+
+const normalizedLang = lang === "en" ? "en" : "de-DE";
+---
+
+<!DOCTYPE html>
+<html lang={normalizedLang} class="antialiased" suppressHydrationWarning>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="Dr. Joy A. Alemazung, Bürgermeister Heubach, Mayor Heubach, Nachhaltigkeit, Sustainability, Migrationspolitik, Migration Policy, Internationale Beziehungen, International Relations, Wissenschaft, Publications" />
+    <meta name="author" content="Dr. Joy A. Alemazung" />
+    <meta name="creator" content="Dr. Joy A. Alemazung" />
+    
+    <link rel="canonical" href="https://alemazung.com" />
+    <link rel="alternate" hreflang="de" href="https://alemazung.com/de" />
+    <link rel="alternate" hreflang="en" href="https://alemazung.com/en" />
+    
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content="https://alemazung.com" />
+    <meta property="og:site_name" content="Dr. Joy A. Alemazung" />
+    <meta property="og:locale" content={normalizedLang === "en" ? "en_US" : "de_DE"} />
+    <meta property="og:type" content="website" />
+    
+    <script is:inline src="https://analytics.jakob-lingel.dev/script.js" data-website-id="80162986-705f-410d-b56e-ba2a61b9ae5e"></script>
+  </head>
+  <body class="font-sans bg-background text-foreground">
+    <script is:inline>
+      const theme = (() => {
+        const localStorageTheme = localStorage?.getItem("theme") ?? '';
+        if (['dark', 'light'].includes(localStorageTheme)) {
+          return localStorageTheme;
+        }
+        return 'light';
+      })();
+      
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+      window.localStorage.setItem('theme', theme);
+    </script>
+    
+    <TopNavigation locale={normalizedLang} />
+    <main>
+      <slot />
+    </main>
+    <Footer locale={normalizedLang} />
+  </body>
+</html>

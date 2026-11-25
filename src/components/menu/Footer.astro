@@ -1,0 +1,100 @@
+---
+import { fetchAPI } from "@/lib/fetch-api";
+import { t } from "@/lib/i18n";
+import ObfuscatedEmailButton from "@/components/shared/ObfuscatedEmailButton.astro";
+import TestingThemeSwitcher from "@/components/menu/TestingThemeSwitcher.astro";
+
+interface Props {
+  locale: string;
+}
+
+const { locale } = Astro.props;
+
+let pageHeaders: any[] = [];
+let homepageSubheading = "";
+
+try {
+  const [pageHeadersResponse, homepageResponse] = await Promise.all([
+    fetchAPI("/pages", { fields: ["heading", "slug"] }, {}, locale),
+    fetchAPI("/homepage", { fields: ["subHeading"] }, {}, locale),
+  ]);
+  
+  pageHeaders = pageHeadersResponse?.data || [];
+  homepageSubheading = homepageResponse?.data?.subHeading || "";
+} catch (error) {
+  console.error("Failed to fetch footer data:", error);
+}
+---
+
+<footer class="w-full border-t border-(--ultralight-accent)/40 bg-(--ultralight-accent)/20">
+  <div class="max-w-7xl mx-auto p-6 lg:pt-62 pb-40">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="md:col-span-1">
+        <h3 class="font-serif text-lg font-semibold mb-4">
+          Dr. Joy A. Alemazung
+        </h3>
+        <p class="text-sm text-(--gray-accent)">
+          {homepageSubheading}
+        </p>
+        <ObfuscatedEmailButton encoded="bW9jLmxpYW1nQGdudXphbWVsYQ==" lang={locale} />
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-(--grey-accent)">
+          {t("navigation", locale)}
+        </h4>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a
+              href={`/${locale}`}
+              class="text-(--grey-accent)/70 hover:text-(--grey-accent) transition"
+            >
+              {t("home", locale)}
+            </a>
+          </li>
+          {pageHeaders.map((page: any) => (
+            <li>
+              <a
+                href={`/${locale}/${page.slug}`}
+                class="text-(--grey-accent)/70 hover:text-(--grey-accent) transition"
+              >
+                {page.heading}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-(--grey-accent)">
+          {t("legal", locale)}
+        </h4>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a
+              href={`/${locale}/impressum`}
+              class="text-(--grey-accent)/70 hover:text-(--grey-accent) transition"
+            >
+              {t("impressum", locale)}
+            </a>
+          </li>
+          <li class="text-(--grey-accent)/70">
+            © {new Date().getFullYear()} Dr. Joy A. Alemazung. Alle Rechte vorbehalten.
+          </li>
+          <li class="text-xs text-(--grey-accent)/50 mt-4">
+            {t("webdesignBy", locale)}{" "}
+            <a
+              href="https://jakob-lingel.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-(--grey-accent) transition"
+            >
+              Jakob Lingel
+            </a>
+          </li>
+          <li class="mt-6"><TestingThemeSwitcher /></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>

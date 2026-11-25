@@ -1,0 +1,23 @@
+---
+import SocialLinksList from "@/components/shared/SocialLinksList.astro";
+
+interface Props {
+  sectionTitle: string;
+}
+
+const { sectionTitle } = Astro.props;
+---
+
+<div class="bg-(--ultralight-accent)">
+  <div class="mx-4 md:mx-auto md:w-2/3 pb-40">
+    <h2 class="text-center mt-0 py-20 text-5xl lg:text-4xl text-foreground font-serif">
+      {sectionTitle}
+    </h2>
+
+    <div class="max-w-3xl mx-auto mt-10">
+      <div class="bg-(--light-accent)/40 rounded-lg">
+        <SocialLinksList />
+      </div>
+    </div>
+  </div>
+</div>

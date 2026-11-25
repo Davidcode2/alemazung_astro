@@ -1,0 +1,55 @@
+---
+import { fetchAPI } from "@/lib/fetch-api";
+import DesktopNav from "@/components/menu/DesktopNav.astro";
+import MobileMenu from "@/components/menu/MobileNav.astro";
+import ThemeSwitcher from "@/components/menu/ThemeSwitcher.astro";
+import LanguageSwitcher from "@/components/menu/LanguageSwitcher.astro";
+
+interface Props {
+  locale: string;
+}
+
+const { locale } = Astro.props;
+
+let pageHeaders: any[] = [];
+let navGroups: any[] = [];
+
+try {
+  const [pageHeadersResponse, navGroupsResponse] = await Promise.all([
+    fetchAPI("/pages", { fields: ["heading", "slug"] }, {}, locale),
+    fetchAPI(
+      "/navigation-groups",
+      {
+        populate: {
+          pages: { fields: ["heading", "slug"] },
+        },
+        sort: ["order:asc"],
+      },
+      {},
+      locale
+    ),
+  ]);
+  
+  pageHeaders = pageHeadersResponse?.data || [];
+  navGroups = navGroupsResponse?.data || [];
+} catch (error) {
+  console.error("Failed to fetch navigation data:", error);
+}
+---
+
+<div class="m-4 flex items-center">
+  <MobileMenu locale={locale} pageHeaders={pageHeaders} />
+  <div class="md:block hidden">
+    <DesktopNav locale={locale} navGroups={navGroups} pageHeaders={pageHeaders} />
+  </div>
+  <div class="ml-auto">
+    <ul class="flex gap-x-4">
+      <li>
+        <LanguageSwitcher locale={locale} />
+      </li>
+      <li>
+        <ThemeSwitcher />
+      </li>
+    </ul>
+  </div>
+</div>

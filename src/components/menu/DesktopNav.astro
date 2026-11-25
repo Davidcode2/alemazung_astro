@@ -1,0 +1,75 @@
+---
+interface Props {
+  locale: string;
+  navGroups: any[];
+  pageHeaders: any[];
+}
+
+const { locale, navGroups, pageHeaders } = Astro.props;
+
+const sorted = navGroups.length > 0 ? [...navGroups].sort((a, b) => a.order - b.order) : [];
+---
+
+{navGroups.length > 0 ? (
+  <ul class="flex items-center gap-x-1">
+    <li>
+      <a href={`/${locale}`} class="px-3 py-2 font-serif text-sm">JAA</a>
+    </li>
+    {sorted.map((group) => (
+      <li class="relative nav-group">
+        <a href={`/${locale}/${group.slug}`} class="px-3 py-2 transition-colors hover:text-(--accent)">
+          {group.label}
+        </a>
+        <div class="nav-dropdown absolute left-0 top-full pt-4 z-50 opacity-0 scale-y-95 -translate-y-1 pointer-events-none transition-all duration-200 ease-out origin-top">
+          <div class="bg-(--background)/90 border border-(--ultralight-accent)/60 rounded-b-lg shadow-lg backdrop-blur-md p-20 xl:min-w-[800px]">
+            <div class="text-[var(--muted-accent)]/80">
+              {group.label}
+            </div>
+            {group.pages?.map((page: any) => (
+              <a href={`/${locale}/${page.slug}`} class="font-serif text-4xl block py-2.5 transition-colors hover:text-(--accent)">
+                {page.heading}
+              </a>
+            ))}
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+) : (
+  <ul class="flex items-center gap-x-4">
+    <li>
+      <a href={`/${locale}`} class="mr-4 font-serif">JAA</a>
+    </li>
+    {pageHeaders.map((page: any) => (
+      <li>
+        <a href={`/${locale}/${page.slug}`} class="mr-4 text-sm">
+          {page.heading}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
+
+<script>
+  document.querySelectorAll(".nav-group").forEach((group) => {
+    const dropdown = group.querySelector(".nav-dropdown");
+    let timeout: ReturnType<typeof setTimeout>;
+    const open = () => {
+      clearTimeout(timeout);
+      dropdown?.classList.add("opacity-100", "scale-y-100", "translate-y-0", "pointer-events-auto");
+      dropdown?.classList.remove("opacity-0", "scale-y-95", "-translate-y-1", "pointer-events-none");
+    };
+    const close = () => {
+      timeout = setTimeout(() => {
+        dropdown?.classList.remove("opacity-100", "scale-y-100", "translate-y-0", "pointer-events-auto");
+        dropdown?.classList.add("opacity-0", "scale-y-95", "-translate-y-1", "pointer-events-none");
+      }, 150);
+    };
+    group.addEventListener("mouseenter", open);
+    group.addEventListener("mouseleave", close);
+    group.addEventListener("focusin", open);
+    group.addEventListener("focusout", (event) => {
+      if (!group.contains((event as FocusEvent).relatedTarget as Node | null)) close();
+    });
+  });
+</script>

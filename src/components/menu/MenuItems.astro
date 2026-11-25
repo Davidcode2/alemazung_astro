@@ -1,0 +1,27 @@
+---
+interface Props {
+  locale: string;
+  pageHeaders: any[];
+}
+
+const { locale, pageHeaders } = Astro.props;
+
+const headers = pageHeaders || [];
+---
+
+<nav class="h-full">
+  <ul class="flex flex-col gap-y-6 justify-center h-full items-start text-xl px-6 gap-x-4">
+    <li>
+      <a href={`/${locale}`} class="mr-4 flex font-serif">
+        JAA
+      </a>
+    </li>
+    {headers.map((page: any) => (
+      <li>
+        <a href={`/${locale}/${page.slug}`} class="mr-4">
+          {page.heading}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

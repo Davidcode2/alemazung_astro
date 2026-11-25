@@ -1,0 +1,50 @@
+---
+import MoreButton from "@/components/shared/MoreButton.astro";
+
+interface Props {
+  post: {
+    id: number;
+    heading: string;
+    slug: string;
+    published_date: string;
+    content: Array<{
+      body: Array<{
+        children: Array<{
+          text: string;
+        }>;
+      }>;
+    }>;
+  };
+  locale: string;
+}
+
+const { post, locale } = Astro.props;
+
+function formatDate(dateString: string, locale: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(locale === "de-DE" ? "de-DE" : "en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+const postContent = post.content[0]?.body[0]?.children[0]?.text || "";
+const postContentPreview = postContent.slice(0, 200) + (postContent.length > 200 ? "..." : "");
+---
+
+<div class="p-8 md:p-10 border border-[var(--ultralight-accent)] dark:border-[var(--grey-accent)] rounded-sm">
+  <div class="pb-6 grid gap-y-3">
+    <h2 class="text-2xl font-serif">{post.heading}</h2>
+    <time
+      datetime={post.published_date}
+      class="text-sm text-[var(--muted-accent)] tracking-wide uppercase"
+    >
+      {formatDate(post.published_date, locale)}
+    </time>
+  </div>
+  <p class="text-[var(--foreground)] leading-relaxed">{postContentPreview}</p>
+  <a href={`/${locale}/posts/${post.slug}`}>
+    <MoreButton locale={locale} />
+  </a>
+</div>

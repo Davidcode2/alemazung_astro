@@ -1,0 +1,104 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { fetchAPI } from "@/lib/fetch-api";
+import { getStrapiMedia } from "@/lib/api-helpers";
+import { normalizeLocale } from "@/lib/i18n";
+import SmallHeroImage from "@/components/homepage/ShortHeroImage.astro";
+import PostGrid from "@/components/posts/PostGrid.astro";
+import StrapiRichText from "@/components/post/StrapiRichText.astro";
+import SocialLinksList from "@/components/shared/SocialLinksList.astro";
+import ContactForm from "@/components/contact/ContactForm.tsx";
+
+const VALID_LOCALES = ['de', 'de-DE', 'en'];
+
+const { lang, slug } = Astro.params;
+
+if (!lang || !VALID_LOCALES.includes(lang)) {
+  return Astro.redirect('/de');
+}
+
+const locale = normalizeLocale(lang);
+
+const path = `/pages`;
+const urlParamsObject = {
+  filters: { slug },
+  populate: {
+    heroImage: { fields: ["url"] },
+    posts: { populate: "*" },
+  },
+};
+
+let response = await fetchAPI(path, urlParamsObject, {}, locale);
+let page = response?.data?.[0];
+
+if (!page) {
+  response = await fetchAPI(path, urlParamsObject);
+  page = response?.data?.[0];
+}
+
+const heroImageUrl = page?.heroImage?.url
+  ? getStrapiMedia(page.heroImage.url)
+  : null;
+const content = page?.content ?? [];
+const posts = page?.posts ?? [];
+---
+
+<Layout lang={lang}>
+  {page ? (
+    <>
+      {heroImageUrl && <SmallHeroImage url={heroImageUrl} />}
+      <div class="mx-auto max-w-5xl p-10">
+        <h1 class="text-4xl md:text-7xl font-semibold font-serif">
+          {page.heading}
+        </h1>
+        {page.subHeading && (
+          <h2 class="text-3xl font-serif italic text-[var(--muted-accent)] mt-6">{page.subHeading}</h2>
+        )}
+        {content.length > 0 && (
+          <section class="pt-8 pb-10">
+            {content.map((block: any, index: number) => {
+              if (block.__component === "text.rich-text-block" && block.body) {
+                return <StrapiRichText content={block.body} />;
+              }
+              if (block.children) {
+                return <StrapiRichText content={[block]} />;
+              }
+              return null;
+            })}
+          </section>
+        )}
+        {posts.length > 0 && <PostGrid posts={posts} locale={locale} />}
+      </div>
+      {slug === "kontakt" && (
+        <div class="bg-(--ultralight-accent)">
+          <div class="mx-4 md:mx-auto md:w-2/3 pb-20">
+            <div class="max-w-3xl mx-auto">
+              <h2 class="text-center mt-0 py-20 text-5xl lg:text-4xl text-foreground font-serif">
+                {locale === "en" ? "Send a message" : "Nachricht senden"}
+              </h2>
+              <div class="bg-(--light-accent)/40 rounded-lg p-6 md:p-10">
+                <ContactForm locale={lang} client:load />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {slug === "kontakt" && (
+        <div class="pb-40">
+          <div class="mx-4 md:mx-auto md:w-2/3">
+            <h2 class="text-center mt-0 py-16 text-5xl lg:text-4xl text-foreground font-serif">
+              {locale === "en" ? "Connect" : "Verbinden"}
+            </h2>
+            <div class="max-w-3xl mx-auto">
+              <div class="bg-(--light-accent)/40 rounded-lg">
+                <SocialLinksList />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  ) : (
+    <div class="p-10">Not found</div>
+  )}
+</Layout>

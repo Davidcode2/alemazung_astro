@@ -1,0 +1,141 @@
+---
+interface TextNode {
+  type: "text";
+  text: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  code?: boolean;
+}
+
+interface LinkNode {
+  type: "link";
+  url: string;
+  children: RichTextNode[];
+}
+
+interface ListItemNode {
+  type: "list-item";
+  children: RichTextNode[];
+}
+
+interface BlockNode {
+  type: "paragraph" | "heading" | "quote" | "code" | "list";
+  children: RichTextNode[];
+  level?: number;
+  format?: "ordered" | "unordered";
+}
+
+type RichTextNode = TextNode | LinkNode | BlockNode | ListItemNode;
+
+interface Props {
+  content: RichTextNode[];
+  className?: string;
+}
+
+const { content, className = "" } = Astro.props;
+
+function escapeHtml(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+
+function renderTextNode(node: TextNode): string {
+  let text = escapeHtml(node.text);
+  
+  if (node.code) {
+    return `<code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono">${text}</code>`;
+  }
+  if (node.strikethrough) {
+    text = `<s>${text}</s>`;
+  }
+  if (node.underline) {
+    text = `<u>${text}</u>`;
+  }
+  if (node.italic) {
+    text = `<em>${text}</em>`;
+  }
+  if (node.bold) {
+    text = `<strong>${text}</strong>`;
+  }
+  
+  return text;
+}
+
+function renderChildren(children: RichTextNode[]): string {
+  return children.map((child, i) => renderNode(child)).join('');
+}
+
+function renderNode(node: RichTextNode): string {
+  if (!node) return '';
+  
+  if (node.type === 'text') {
+    return renderTextNode(node as TextNode);
+  }
+  
+  if (node.type === 'link') {
+    const linkNode = node as LinkNode;
+    const url = linkNode.url.trim();
+    const protocol = url.replace(/[\u0000-\u0020]/g, "").match(/^([a-z][a-z\d+.-]*):/i)?.[1].toLowerCase();
+    if (protocol && !["http", "https", "mailto", "tel"].includes(protocol)) {
+      return renderChildren(linkNode.children);
+    }
+    const safeUrl = escapeHtml(url);
+    const isExternal = url.startsWith('http');
+    if (isExternal) {
+      return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">${renderChildren(linkNode.children)}</a>`;
+    }
+    return `<a href="${safeUrl}" class="text-blue-600 dark:text-blue-400 hover:underline">${renderChildren(linkNode.children)}</a>`;
+  }
+  
+  if (node.type === 'list-item') {
+    const listItemNode = node as ListItemNode;
+    return `<li class="ml-4">${renderChildren(listItemNode.children)}</li>`;
+  }
+  
+  const blockNode = node as BlockNode;
+  
+  switch (blockNode.type) {
+    case 'paragraph':
+      return `<p class="whitespace-pre-line text-foreground pb-4">${renderChildren(blockNode.children)}</p>`;
+    
+    case 'heading': {
+      const level = blockNode.level && blockNode.level >= 1 && blockNode.level <= 6 && Number.isInteger(blockNode.level) ? blockNode.level : 1;
+      const headingClasses: Record<number, string> = {
+        1: 'text-4xl font-bold mb-6 mt-8 font-serif',
+        2: 'text-3xl font-bold mb-5 mt-7 font-serif',
+        3: 'text-2xl font-semibold mb-4 mt-6',
+        4: 'text-xl font-semibold mb-3 mt-5',
+        5: 'text-lg font-semibold mb-2 mt-4',
+        6: 'text-base font-semibold mb-2 mt-3',
+      };
+      return `<h${level} class="${headingClasses[level]}">${renderChildren(blockNode.children)}</h${level}>`;
+    }
+    
+    case 'quote':
+      return `<blockquote class="border-l-4 border-gray-300 dark:border-gray-700 pl-4 italic my-4 text-gray-700 dark:text-gray-300">${renderChildren(blockNode.children)}</blockquote>`;
+    
+    case 'code':
+      return `<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-4"><code class="text-sm font-mono">${renderChildren(blockNode.children)}</code></pre>`;
+    
+    case 'list': {
+      const ListTag = blockNode.format === 'ordered' ? 'ol' : 'ul';
+      const listClass = blockNode.format === 'ordered' ? 'list-decimal' : 'list-disc';
+      return `<${ListTag} class="${listClass} ml-6 mb-4 space-y-2">${renderChildren(blockNode.children)}</${ListTag}>`;
+    }
+    
+    default:
+      return '';
+  }
+}
+
+if (!content || !Array.isArray(content)) {
+  return;
+}
+---
+
+<div class={`prose prose-lg dark:prose-invert max-w-none ${className}`}>
+  {content.map((node) => (
+    <Fragment set:html={renderNode(node)} />
+  ))}
+</div>

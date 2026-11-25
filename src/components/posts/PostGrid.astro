@@ -1,0 +1,16 @@
+---
+import PostPreviewCard from "@/components/posts/PostPreviewCard.astro";
+
+interface Props {
+  posts: any[];
+  locale: string;
+}
+
+const { posts, locale } = Astro.props;
+---
+
+<div class="grid lg:grid-cols-2 gap-10">
+  {posts && posts.length > 0 && posts.map((post) => (
+    <PostPreviewCard post={post} locale={locale} />
+  ))}
+</div>

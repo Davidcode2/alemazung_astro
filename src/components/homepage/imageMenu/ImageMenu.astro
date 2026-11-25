@@ -1,0 +1,81 @@
+---
+import { getStrapiMedia } from "@/lib/api-helpers";
+import { t } from "@/lib/i18n";
+
+interface Page {
+  id: number;
+  heading: string;
+  subHeading?: string;
+  slug: string;
+  heroImage?: {
+    url: string;
+    alternativeText?: string;
+  };
+}
+
+interface Props {
+  pages: Page[];
+  locale: string;
+}
+
+const { pages, locale } = Astro.props;
+
+const pagesWithImages = pages.filter((page) => page.heroImage?.url);
+
+if (pagesWithImages.length === 0) {
+  return;
+}
+
+const count = pagesWithImages.length;
+const showExtraMd = count % 2 === 1;
+const showExtraLg = count % 3 !== 0;
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+  {pagesWithImages.map((page) => {
+    const imageUrl = getStrapiMedia(page.heroImage!.url);
+    if (!imageUrl) return null;
+    
+    return (
+      <a
+        href={`/${locale}/${page.slug}`}
+        class="group relative aspect-[4/3] overflow-hidden block"
+      >
+        <img
+          src={imageUrl}
+          alt={page.heroImage?.alternativeText || page.heading}
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+          <h3 class="text-white text-xl md:text-2xl font-serif font-semibold mb-2">
+            {page.heading}
+          </h3>
+          
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-(--light-accent) flex items-center justify-center transition-all duration-300 group-hover:bg-(--accent) group-hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-colors duration-300"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+            <span class="text-white/90 text-sm md:text-base">
+              {page.subHeading || t("learnMore", locale)}
+            </span>
+          </div>
+        </div>
+      </a>
+    );
+  })}
+  <div class:list={[
+    "hidden group relative aspect-[4/3] overflow-hidden",
+    showExtraMd && "md:block",
+    showExtraLg && "lg:block"
+  ]}>
+    <img
+      src="/images/rosenstein_image.jpg"
+      alt="Rosenstein"
+      class="w-full h-full object-cover"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+  </div>
+</div>

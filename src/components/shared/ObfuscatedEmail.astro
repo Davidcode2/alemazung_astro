@@ -1,0 +1,41 @@
+---
+interface Props {
+  encoded: string;
+  className?: string;
+  showIcon?: boolean;
+  label?: string;
+}
+
+const { encoded, className = "", showIcon = false, label } = Astro.props;
+---
+
+<span class:list={[className, "obfuscated-email"]} data-encoded={encoded} data-label={label}>
+  {label && <span class="font-semibold">{label} </span>}
+  <span class="text-blue-600 dark:text-blue-400">Loading...</span>
+</span>
+
+<script>
+  document.querySelectorAll('.obfuscated-email').forEach((el) => {
+    const encoded = el.getAttribute('data-encoded');
+    if (encoded) {
+      try {
+        const decoded = atob(encoded);
+        const reversed = decoded.split('').reverse().join('');
+        const link = document.createElement('a');
+        link.href = `mailto:${reversed}`;
+        link.className = 'text-blue-600 dark:text-blue-400 hover:underline';
+        link.textContent = reversed;
+        el.innerHTML = '';
+        if (el.getAttribute('data-label')) {
+          const labelSpan = document.createElement('span');
+          labelSpan.className = 'font-semibold';
+          labelSpan.textContent = el.getAttribute('data-label') + ' ';
+          el.appendChild(labelSpan);
+        }
+        el.appendChild(link);
+      } catch (error) {
+        console.error('Failed to decode email:', error);
+      }
+    }
+  });
+</script>

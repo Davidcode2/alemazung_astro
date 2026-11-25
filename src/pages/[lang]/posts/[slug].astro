@@ -1,0 +1,67 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { fetchAPI } from "@/lib/fetch-api";
+import { normalizeLocale } from "@/lib/i18n";
+import BackButton from "@/components/shared/BackButton.astro";
+import StrapiRichText from "@/components/post/StrapiRichText.astro";
+import ImageComponent from "@/components/post/ImageComponent.astro";
+
+const VALID_LOCALES = ['de', 'de-DE', 'en'];
+
+const { lang, slug } = Astro.params;
+
+if (!lang || !VALID_LOCALES.includes(lang)) {
+  return Astro.redirect('/de');
+}
+
+const locale = normalizeLocale(lang);
+
+function formatDate(dateString: string, locale: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(locale === "de-DE" ? "de-DE" : "en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+const urlParamsObject = {
+  filters: { slug },
+  populate: {
+    content: { populate: "*" },
+  },
+};
+
+const response = await fetchAPI(`/posts`, urlParamsObject, {}, locale);
+const post = response?.data?.[0];
+---
+
+<Layout lang={lang}>
+  <div class="mx-8 sm:max-w-xl md:mx-auto my-12 lg:max-w-4xl">
+    <BackButton />
+    {post ? (
+      <>
+        <div class="pb-8 grid gap-y-3">
+          <h2 class="text-4xl md:text-5xl font-serif">{post.heading}</h2>
+          <time
+            datetime={post.published_date}
+            class="text-sm text-[var(--muted-accent)] tracking-wide uppercase"
+          >
+            {formatDate(post.published_date, locale)}
+          </time>
+        </div>
+        {post.content?.map((block: any, index: number) => {
+          if (block.__component === "text.rich-text-block") {
+            return <StrapiRichText content={block.body} />;
+          }
+          if (block.__component === "image.image-block") {
+            return <ImageComponent image={block.image} />;
+          }
+          return null;
+        })}
+      </>
+    ) : (
+      <p>Post not found</p>
+    )}
+  </div>
+</Layout>

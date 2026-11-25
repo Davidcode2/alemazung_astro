@@ -1,0 +1,51 @@
+---
+import { FaLinkedin, FaInstagram, FaFacebook } from "react-icons/fa";
+
+interface SocialLink {
+  id: string;
+  name: string;
+  url: string;
+}
+
+const socialLinks: SocialLink[] = [
+  {
+    id: "linkedin",
+    name: "LinkedIn",
+    url: "https://de.linkedin.com/in/dr-joy-asongazoh-alemazung-b554362a",
+  },
+  {
+    id: "instagram",
+    name: "Instagram",
+    url: "https://www.instagram.com/dr.alemazung/",
+  },
+  {
+    id: "facebook",
+    name: "Facebook",
+    url: "https://www.facebook.com/dralemazung/?locale=de_DE",
+  },
+];
+---
+
+<ul class="px-6 md:px-10 py-6 flex flex-col">
+  {socialLinks.map((link, index) => {
+    const isLast = index === socialLinks.length - 1;
+    const IconComponent = link.id === "linkedin" ? FaLinkedin : link.id === "instagram" ? FaInstagram : FaFacebook;
+    return (
+      <li class:list={[isLast ? "" : "border-b border-(--light-accent)", "py-6"]}>
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group flex items-center gap-x-6 text-foreground hover:text-(--accent) transition-colors duration-300"
+        >
+          <div class="w-14 h-14 rounded-full bg-(--light-accent) flex items-center justify-center transition-all duration-300 group-hover:bg-(--accent) group-hover:scale-110">
+            <IconComponent size={24} class="text-(--dark-accent) group-hover:text-white transition-colors duration-300" />
+          </div>
+          <span class="text-lg md:text-xl font-medium">
+            {link.name}
+          </span>
+        </a>
+      </li>
+    );
+  })}
+</ul>

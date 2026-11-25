@@ -1,0 +1,104 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import BackButton from "@/components/shared/BackButton.astro";
+import ObfuscatedEmail from "@/components/shared/ObfuscatedEmail.astro";
+import { impressumDE } from "@/content/impressum/de";
+import { impressumEN } from "@/content/impressum/en";
+
+const VALID_LOCALES = ['de', 'de-DE', 'en'];
+
+const { lang } = Astro.params;
+
+if (!lang || !VALID_LOCALES.includes(lang)) {
+  return Astro.redirect('/de');
+}
+
+function getImpressumContent(lang: string) {
+  return lang === 'en' ? impressumEN : impressumDE;
+}
+
+const content = getImpressumContent(lang);
+---
+
+<Layout lang={lang}>
+  <div class="max-w-4xl mx-auto px-6 py-12 pb-40">
+    <BackButton />
+
+    <h1 class="text-5xl font-bold font-serif mb-8 mt-4">{content.title}</h1>
+
+    <div class="space-y-8 text-gray-700 dark:text-gray-300">
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          {content.sections.provider.heading}
+        </h2>
+        <div class="space-y-2">
+          <p class="font-semibold">{content.sections.provider.name}</p>
+          {content.sections.provider.address.map((line) => (
+            <p>{line}</p>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          {content.sections.contact.heading}
+        </h2>
+        <div class="space-y-2">
+          <ObfuscatedEmail
+            encoded="ZWQuaGNhYnVlaEBvZm5pCg=="
+            label={content.sections.contact.emailLabel}
+          />
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          {content.sections.responsible.heading}
+        </h2>
+        {content.sections.responsible.address.map((line) => (
+          <p>{line}</p>
+        ))}
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          {content.sections.contentLiability.heading}
+        </h2>
+        {content.sections.contentLiability.paragraphs.map((paragraph, index) => (
+          <p class={index > 0 ? "mt-2" : ""}>
+            {paragraph}
+          </p>
+        ))}
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          {content.sections.linkLiability.heading}
+        </h2>
+        {content.sections.linkLiability.paragraphs.map((paragraph, index) => (
+          <p class={index > 0 ? "mt-2" : ""}>
+            {paragraph}
+          </p>
+        ))}
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          {content.sections.copyright.heading}
+        </h2>
+        {content.sections.copyright.paragraphs.map((paragraph, index) => (
+          <p class={index > 0 ? "mt-2" : ""}>
+            {paragraph}
+          </p>
+        ))}
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100 break-words">
+          {content.sections.consumerDispute.heading}
+        </h2>
+        <p>{content.sections.consumerDispute.text}</p>
+      </section>
+    </div>
+  </div>
+</Layout>
