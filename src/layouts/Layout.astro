@@ -29,6 +29,7 @@ const {
 } = Astro.props;
 
 const normalizedLang = lang === "en" ? "en" : "de-DE";
+const canonicalUrl = new URL(Astro.url.pathname, "https://alemazung.de").href;
 ---
 
 <!DOCTYPE html>
@@ -42,13 +43,13 @@ const normalizedLang = lang === "en" ? "en" : "de-DE";
     <meta name="author" content="Dr. Joy A. Alemazung" />
     <meta name="creator" content="Dr. Joy A. Alemazung" />
     
-    <link rel="canonical" href="https://alemazung.com" />
-    <link rel="alternate" hreflang="de" href="https://alemazung.com/de" />
-    <link rel="alternate" hreflang="en" href="https://alemazung.com/en" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="de" href="https://alemazung.de/de-DE" />
+    <link rel="alternate" hreflang="en" href="https://alemazung.de/en" />
     
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content="https://alemazung.com" />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="Dr. Joy A. Alemazung" />
     <meta property="og:locale" content={normalizedLang === "en" ? "en_US" : "de_DE"} />
     <meta property="og:type" content="website" />
