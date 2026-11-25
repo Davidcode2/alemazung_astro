@@ -118,18 +118,19 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Update deployment image tag
-        working-directory: joy-alemazung
+        working-directory: alemazungv2
         run: |
-          DEPLOY_FILE="alemazung-app-deployment.yaml"
-          sed -i "s|image: ghcr.io/davidcode2/.*:.*|image: ghcr.io/davidcode2/alemazung_astro:${VERSION}|g" "$DEPLOY_FILE"
+          DEPLOY_FILE="alemazungv2-deployment.yaml"
+          grep -qE '^[[:space:]]*image: ghcr.io/davidcode2/alemazung_astro:[^[:space:]]+$' "$DEPLOY_FILE"
+          sed -i "s|image: ghcr.io/davidcode2/alemazung_astro:.*|image: ghcr.io/davidcode2/alemazung_astro:${VERSION}|g" "$DEPLOY_FILE"
           echo "Updated image tag to ${VERSION}"
 
       - name: Commit and push deployment changes
-        working-directory: joy-alemazung
+        working-directory: alemazungv2
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git diff --exit-code && echo "No changes to commit" && exit 0
-          git add .
+          git add alemazungv2-deployment.yaml
           git commit -m "deploy: alemazung astro v${VERSION}"
           git push
