@@ -8,7 +8,6 @@ import HeroSummaryQuoteSeparator from "@/components/homepage/heroSummaryQuoteSep
 import ImageMenu from "@/components/homepage/imageMenu/ImageMenu.astro";
 import DescriptionText from "@/components/homepage/description/DescriptionText.astro";
 import SocialLinks from "@/components/homepage/socialLinks/SocialLinks.astro";
-import VerticalDividerBracket from "@/components/shared/VerticalDividerBracket.astro";
 
 const VALID_LOCALES = ['de', 'de-DE', 'en'];
 
@@ -87,7 +86,6 @@ const imageUrl = data?.headerImage?.url ? getStrapiMedia(data.headerImage.url) :
       <HeroSummaryQuoteSeparator content={data.content} quote={data.quote} locale={lang} />
       <ImageMenu pages={pages} locale={lang} />
       <DescriptionText content={data.content} locale={lang} />
-      <VerticalDividerBracket />
       <SocialLinks sectionTitle={lang === "en" ? "Connect" : "Verbinden"} />
     </>
   ) : (
